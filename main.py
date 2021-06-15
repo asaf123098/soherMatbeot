@@ -10,7 +10,7 @@ from strategy_tester import StrategyTester
 RESULTS_FOLDER = ".\\test_results"
 
 def main():
-    strategy = DecisionTreeAI
+    strategy = ThreeEmaStochRsi
     new_dir_path = RESULTS_FOLDER + "\\" + strategy.__name__
 
     if not os.path.isdir(new_dir_path):
