@@ -9,17 +9,15 @@ from strategy_tester import StrategyTester
 
 RESULTS_FOLDER = ".\\test_results"
 
+
 def main():
-    strategy = ThreeEmaStochRsi
-    new_dir_path = RESULTS_FOLDER + "\\" + strategy.__name__
+    strategy = DecisionTreeAI
+    new_dir_path = os.path.join(RESULTS_FOLDER, strategy.__name__)
 
     if not os.path.isdir(new_dir_path):
         os.mkdir(new_dir_path)
 
     for interval in INTERVAL_OPTS:
-        if interval != "5m":
-            continue
-
         coins_data = fetch_data(interval)
         strat_tester = StrategyTester(strategy, coins_data, interval=interval)
         analysis = strat_tester.get_analysis()
