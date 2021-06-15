@@ -1,0 +1,8 @@
+.idea/*
+test_results/*
+__pycache__/*
+coins_data/*
+*/__pycache__/*
+*.log
+*.pyc
+
