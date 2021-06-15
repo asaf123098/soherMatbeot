@@ -2,7 +2,7 @@ import os
 import pandas as pd
 
 
-DATA_FOLDER = "d:\\coins_data"
+DATA_FOLDER = "coins_data"
 
 
 def fetch_data(interval):
