@@ -76,7 +76,7 @@ def change_df(data):
 def main():
     client = Client(API_KEY, SECRET_KEY)
     coins_list = client.get_all_tickers()
-    coins_usdt_list = [row["symbol"] for row in coins_list if row["symbol"].endswith("USDT")][:50]
+    coins_usdt_list = [row["symbol"] for row in coins_list if row["symbol"].endswith("USDT")]
 
     for coin in tqdm(coins_usdt_list):
         folder_coin = DATA_PATH + coin
