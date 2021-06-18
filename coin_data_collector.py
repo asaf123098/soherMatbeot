@@ -98,12 +98,16 @@ def main():
         os.mkdir(folder_coin)
 
         for interval in INTERVAL_OPTS:
-            start_date_timestamp = n_candles_to_start_date(START_DATETIME, interval)
-            data = client.get_historical_klines(coin, interval, start_str=start_date_timestamp)
-            data_df = pd.DataFrame(data, columns=OHLCV_COLUMN_NAMES)
-            data_df = change_df(data_df)
-            filename = folder_coin + f"\\{interval}.csv"
-            data_df.to_csv(filename, index=False)
+            try:
+                start_date_timestamp = n_candles_to_start_date(START_DATETIME, interval)
+                data = client.get_historical_klines(coin, interval, start_str=start_date_timestamp)
+                data_df = pd.DataFrame(data, columns=OHLCV_COLUMN_NAMES)
+                data_df = change_df(data_df)
+                filename = folder_coin + f"\\{interval}.csv"
+                data_df.to_csv(filename, index=False)
+            except Exception as e:
+                print(coin, interval)
+                continue
 
 
 if __name__ == "__main__":
