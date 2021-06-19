@@ -104,7 +104,7 @@ def main():
                 data_df = pd.DataFrame(data, columns=OHLCV_COLUMN_NAMES)
                 data_df = change_df(data_df)
                 filename = folder_coin + f"\\{interval}.csv"
-                data_df.to_csv(filename, index=False)
+                data_df.to_pickle(filename)
             except Exception as e:
                 print(coin, interval)
                 continue
