@@ -1,10 +1,14 @@
-import re
 import os
-import csv
-import pandas as pd
+import re
 from datetime import datetime, timedelta
+
+import pandas as pd
 from binance.client import Client
 from tqdm import tqdm
+
+ONE_MINUTE = 60
+ONE_HOUR = ONE_MINUTE * 60
+ONE_DAY = ONE_HOUR * 24
 
 REGEX = "(\d{,2})([a-zA-Z])"
 API_KEY = "5G3Tdy6uqvM8pgOjfxL7FmHQBwTTD1qlyZW6l0V8WrIAXDxIv15fGAzcMm9fXQbs"
@@ -25,7 +29,7 @@ INTERVAL_OPTS = [
 ]
 N_CANDLES = 1000
 START_DATETIME = datetime(2020, 1, 1)
-DATA_PATH = "coins_data"
+COINS_DATA_PATH = "coins_data"
 OHLCV_COLUMN_NAMES = ["open_time", "open", "high", "low", "close", "volume", "close_time", "quote_asset_volume",
                       "n_trades", "base_asset_volume", "quote_asset_volume", "ignore"]
 
@@ -48,23 +52,23 @@ def n_candles_to_start_date(start_date: datetime, interval):
     time_back = n_interval * N_CANDLES
 
     if interval_type == 'm':
-        if time_diff_in_seconds / (60 * n_interval) < N_CANDLES:
+        if time_diff_in_seconds / (ONE_MINUTE * n_interval) < N_CANDLES:
             time_back = (end_date - start_date).total_seconds() / (60 * n_interval)
         start_date = end_date - timedelta(minutes=time_back)
     elif interval_type == "h":
-        if time_diff_in_seconds / (60 * 60 * n_interval) < N_CANDLES:
+        if time_diff_in_seconds / (ONE_HOUR * n_interval) < N_CANDLES:
             time_back = (end_date - start_date).total_seconds() / (60 * 60 * n_interval)
         start_date = end_date - timedelta(hours=time_back)
     elif interval_type == "d":
-        if time_diff_in_seconds / (60 * 60 * 24 * n_interval) < N_CANDLES:
+        if time_diff_in_seconds / (ONE_DAY * n_interval) < N_CANDLES:
             time_back = (end_date - start_date).total_seconds() / (60 * 60 * 24 * n_interval)
         start_date = end_date - timedelta(days=time_back)
     elif interval_type == "w":
-        if time_diff_in_seconds / (60 * 60 * 24 * 7 * n_interval) < N_CANDLES:
+        if time_diff_in_seconds / (ONE_DAY * 7 * n_interval) < N_CANDLES:
             time_back = (end_date - start_date).total_seconds() / (60 * 60 * 24 * 7 * n_interval)
         start_date = end_date - timedelta(weeks=time_back)
     elif interval_type == "M":
-        if time_diff_in_seconds / (60 * 60 * 24 * 30 * n_interval) < N_CANDLES:
+        if time_diff_in_seconds / (ONE_DAY * 30 * n_interval) < N_CANDLES:
             time_back = (end_date - start_date).total_seconds() / (60 * 60 * 24 * 30 * n_interval)
         start_date = end_date - timedelta(days=time_back)
     else:
@@ -91,7 +95,7 @@ def main():
     coins_usdt_list = [row["symbol"] for row in coins_list if row["symbol"].endswith("USDT")]
 
     for coin in tqdm(coins_usdt_list):
-        folder_coin = os.path.join(DATA_PATH, coin)
+        folder_coin = os.path.join(COINS_DATA_PATH, coin)
         if os.path.exists(folder_coin):
             os.remove(folder_coin)
 
