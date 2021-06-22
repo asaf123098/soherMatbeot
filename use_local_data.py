@@ -1,16 +1,14 @@
 import os
+
 import pandas as pd
 
 
-DATA_FOLDER = "coins_data"
-
-
-def fetch_data(interval):
+def use_local_data(interval, path):
     coins_data = []
-    coin_names = os.listdir(DATA_FOLDER)
+    coin_names = os.listdir(path)
 
     for coin in coin_names:
-        file_name = DATA_FOLDER + f"\\{coin}\\{interval}.csv"
+        file_name = path + f"\\{coin}\\{interval}.csv"
         data = pd.read_csv(file_name)
         data["time"] = pd.to_datetime(data.time)
         data.rename(columns={"time": "datetime"}, inplace=True)

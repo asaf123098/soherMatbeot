@@ -1,9 +1,10 @@
 import os
 import json
 from constants import INTERVAL_OPTS
+from coin_data_fetcher import COINS_DATA_PATH
 from strategies.examples import ThreeEmaStochRsi, ParabolicSAR_SMA200, IchiStcCmf, SuperTrendStochEma200, \
     StochRsiMACD, ParabolicSAR_EMA200_MACD, DecisionTreeAI
-from data_fetcher import fetch_data
+from use_local_data import use_local_data
 from strategy_tester import StrategyTester
 
 
@@ -17,10 +18,7 @@ def main():
         os.mkdir(new_dir_path)
 
     for interval in INTERVAL_OPTS:
-        if interval != "5m":
-            continue
-
-        coins_data = fetch_data(interval)
+        coins_data = use_local_data(interval, COINS_DATA_PATH)
         strat_tester = StrategyTester(strategy, coins_data, interval=interval)
         analysis = strat_tester.get_analysis()
         print(interval, analysis["daily_increase_percentage"], analysis["total_amount"], analysis["starting_amount"])
