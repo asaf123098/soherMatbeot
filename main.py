@@ -1,9 +1,8 @@
 import os
 import json
 from constants import INTERVAL_OPTS
-from coin_data_fetcher import COINS_DATA_PATH
-from strategies.examples import ThreeEmaStochRsi, ParabolicSAR_SMA200, IchiStcCmf, SuperTrendStochEma200, \
-    StochRsiMACD, ParabolicSAR_EMA200_MACD, DecisionTreeAI
+from data_fetchers.coin_data_fetcher import COINS_DATA_PATH
+from strategies.examples import ThreeEmaStochRsi
 from use_local_data import use_local_data
 from strategy_tester import StrategyTester
 
