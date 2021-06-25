@@ -103,7 +103,7 @@ def main():
                 data = client.get_historical_klines(coin, interval, start_str=start_date_timestamp)
                 data_df = pd.DataFrame(data, columns=OHLCV_COLUMN_NAMES)
                 data_df = change_df(data_df)
-                filename = folder_coin + f"\\{interval}.csv"
+                filename = folder_coin + f"\\{interval}.pklz"
                 data_df.to_pickle(filename)
             except Exception as e:
                 print(coin, interval)
