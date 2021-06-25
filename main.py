@@ -2,7 +2,7 @@ import os
 import json
 from constants import INTERVAL_OPTS
 from strategies.examples import ThreeEmaStochRsi, ParabolicSAR_SMA200, IchiStcCmf, SuperTrendStochEma200, \
-    StochRsiMACD, ParabolicSAR_EMA200_MACD, DecisionTreeAI
+    StochRsiMACD, ParabolicSAR_EMA200_MACD, DecisionTreeAITrend
 from data_fetcher import fetch_data
 from strategy_tester import StrategyTester
 
