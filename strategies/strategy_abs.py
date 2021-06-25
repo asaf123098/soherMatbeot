@@ -9,7 +9,7 @@ from abc import abstractmethod
 
 class StrategyAbs(Strategy):
     params = (
-        ("max_percentage", 0.8),
+        ("max_percentage", 0.2),
         ("min_amount", 20),
     )
 
