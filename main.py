@@ -21,6 +21,7 @@ def main():
             continue
 
         coins_data = fetch_data(interval)
+        # Adding interval as param is needed only for DecisionTreeAITrend
         strat_tester = StrategyTester(strategy, coins_data, interval=interval)
         analysis = strat_tester.get_analysis()
         print(interval, analysis["daily_increase_percentage"], analysis["total_amount"], analysis["starting_amount"])
