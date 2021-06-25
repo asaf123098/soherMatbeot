@@ -1,4 +1,5 @@
 import os
+import glob
 import pandas as pd
 
 
@@ -7,11 +8,11 @@ DATA_FOLDER = "coins_data"
 
 def fetch_data(interval):
     coins_data = []
-    coin_names = os.listdir(DATA_FOLDER)
+    coins_data_files = glob.glob(DATA_FOLDER + f"\\*\\{interval}.pklz")
 
-    for coin in coin_names:
-        file_name = DATA_FOLDER + f"\\{coin}\\{interval}.pklz"
-        data = pd.read_pickle(file_name)
+    for coin_file in coins_data_files:
+        coin = coin_file.split("\\")[1]
+        data = pd.read_pickle(coin_file)
         data["time"] = pd.to_datetime(data.time)
         data.rename(columns={"time": "datetime"}, inplace=True)
         data.set_index("datetime", inplace=True)
