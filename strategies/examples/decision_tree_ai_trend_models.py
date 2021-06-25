@@ -10,9 +10,10 @@ RISK = 1.5
 N_CANDLES_BACK = 10
 MODEL_PATH = r"C:\Users\ofeki\Desktop\CryptoAITests\Models\trend_model_{}.pickle"
 
-class DecisionTreeAI(StrategyAbs):
+
+class DecisionTreeAITrend(StrategyAbs):
     def __init__(self, interval: str):
-        super(DecisionTreeAI, self).__init__()
+        super(DecisionTreeAITrend, self).__init__()
 
         with open(MODEL_PATH.format(interval), "rb") as f:
             self.model = pickle.load(f)
