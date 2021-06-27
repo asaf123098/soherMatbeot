@@ -1,113 +1,76 @@
-import re
 import os
-import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
+from os.path import join, abspath, dirname, exists
+
+import bs4 as bs
+import requests
+import yfinance
 from tqdm import tqdm
+
+from data_fetchers.coin_data_fetcher import _separate_amount_type
+
+START = datetime(2019, 6, 1)
+END = datetime(2021, 6, 7)
+INTERVAL = "1d"
+
+N_CANDLES = 1000
 
 ONE_MINUTE = 60
 ONE_HOUR = ONE_MINUTE * 60
 ONE_DAY = ONE_HOUR * 24
 
-REGEX = "(\d{,2})([a-zA-Z])"
-INTERVAL_OPTS = [
-    "8h",
-    "6h",
-    "4h",
-    "2h",
-    "15m",
-    "12h",
-    "30m",
-    "5m",
-    "3m",
-    "1m",
-    "1h",
-    "1d"
-]
-N_CANDLES = 1000
-START_DATETIME = datetime(2020, 1, 1)
-DATA_PATH = "stocks_data"
+INTERVAL_OPTS = ["1m", "2m", "5m", "15m", "30m", "60m", "90m", "1h", "1d", "5d", "1wk", "1mo", "3mo"]
+
+STOCKS_DATA_DIR = abspath(join(dirname(__file__), "..", "stocks_data"))
+
 OHLCV_COLUMN_NAMES = ["open_time", "open", "high", "low", "close", "volume"]
 
 
-def _separate_amount_type(interval: str):
-    interval_info = re.compile(REGEX).findall(interval)
-
-    if not interval_info:
-        raise ValueError("Something wrong with interval")
-
-    n_interval, interval_type = interval_info[0]
-    return int(n_interval), interval_type
-
-
-def n_candles_to_start_date(start_date: datetime, interval):
-    end_date = datetime.now()
-    time_diff = end_date - start_date
-    time_diff_in_seconds = time_diff.total_seconds()
-    n_interval, interval_type = _separate_amount_type(interval)
-    time_back = n_interval * N_CANDLES
-
-    if interval_type == 'm':
-        if time_diff_in_seconds / (ONE_MINUTE * n_interval) < N_CANDLES:
-            time_back = (end_date - start_date).total_seconds() / (60 * n_interval)
-        start_date = end_date - timedelta(minutes=time_back)
-    elif interval_type == "h":
-        if time_diff_in_seconds / (ONE_HOUR * n_interval) < N_CANDLES:
-            time_back = (end_date - start_date).total_seconds() / (60 * 60 * n_interval)
-        start_date = end_date - timedelta(hours=time_back)
-    elif interval_type == "d":
-        if time_diff_in_seconds / (ONE_DAY * n_interval) < N_CANDLES:
-            time_back = (end_date - start_date).total_seconds() / (60 * 60 * 24 * n_interval)
-        start_date = end_date - timedelta(days=time_back)
-    elif interval_type == "w":
-        if time_diff_in_seconds / (ONE_DAY * 7 * n_interval) < N_CANDLES:
-            time_back = (end_date - start_date).total_seconds() / (60 * 60 * 24 * 7 * n_interval)
-        start_date = end_date - timedelta(weeks=time_back)
-    elif interval_type == "M":
-        if time_diff_in_seconds / (ONE_DAY * 30 * n_interval) < N_CANDLES:
-            time_back = (end_date - start_date).total_seconds() / (60 * 60 * 24 * 30 * n_interval)
-        start_date = end_date - timedelta(days=time_back)
-    else:
-        ValueError("Wrong Interval")
-
-    start_date_timestamp = int(start_date.timestamp() * 1000)
-    return start_date_timestamp
+# def change_df(data: DataFrame):
+#     data.rename(columns={"open_time": "time"}, inplace=True)
+#     data["close"] = data.close.astype(float)
+#     # data["open"] = data.open.astype(float)
+#     # data["low"] = data.low.astype(float)
+#     # data["high"] = data.high.astype(float)
+#     # data["volume"] = data.volume.astype(float)
+#     # data["time"] = pd.to_datetime(data.time, unit="ms")
+#     return data[["time", "close", "high", "low", "open", "volume"]]
 
 
-def change_df(data):
-    data.rename(columns={"close_time": "time"}, inplace=True)
-    data["close"] = data.close.astype(float)
-    data["open"] = data.open.astype(float)
-    data["low"] = data.low.astype(float)
-    data["high"] = data.high.astype(float)
-    data["volume"] = data.volume.astype(float)
-    data["time"] = pd.to_datetime(data.time, unit="ms")
-    return data[["time", "close", "high", "low", "open", "volume"]]
+def _get_all_sp500_symbols():
+    resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
+    soup = bs.BeautifulSoup(resp.text, 'lxml')
+    table = soup.find('table', {'class': 'wikitable sortable'})
+    tickers = []
+    for row in table.findAll('tr')[1:]:
+        ticker = row.findAll('td')[0].text
+        tickers.append(ticker)
+    tickers = [s.replace('\n', '') for s in tickers]
+    return tickers
 
 
-def main():
-    client = Client(API_KEY, SECRET_KEY)
-    coins_list = client.get_all_tickers()
-    coins_usdt_list = [row["symbol"] for row in coins_list if row["symbol"].endswith("USDT")]
+def _verify_start_end():
+    """This method verifies that the delta of the start and end time is ok with y finance"""
+    assert END > START, "The start time must be before the end time!!!"
 
-    for coin in tqdm(coins_usdt_list):
-        folder_coin = os.path.join(DATA_PATH, coin)
-        if os.path.exists(folder_coin):
-            os.remove(folder_coin)
-
-        os.mkdir(folder_coin)
-
-        for interval in INTERVAL_OPTS:
-            try:
-                start_date_timestamp = n_candles_to_start_date(START_DATETIME, interval)
-                data = client.get_historical_klines(coin, interval, start_str=start_date_timestamp)
-                data_df = pd.DataFrame(data, columns=OHLCV_COLUMN_NAMES)
-                data_df = change_df(data_df)
-                filename = folder_coin + f"\\{interval}.csv"
-                data_df.to_pickle(filename)
-            except Exception as e:
-                print(coin, interval)
-                continue
+    n_interval, interval_type = _separate_amount_type(INTERVAL)
+    if interval_type == "m":
+        if n_interval == 1:
+            assert (END - START).days <= 7, f"Max time for {INTERVAL} interval is 7 days!!"
+            assert (datetime.now() - START).days <= 30, f"Start time must be within the last 30 days!!!"
 
 
 if __name__ == "__main__":
-    main()
+    _verify_start_end()
+
+    tickers = _get_all_sp500_symbols()
+
+    for ticker in tqdm(tickers):
+        data = yfinance.Ticker(ticker).history(interval=INTERVAL, start=START, end=END)
+        data.rename(columns={"open_time": "time"}, inplace=True)
+
+        ticker_folder = abspath(join(STOCKS_DATA_DIR, ticker))
+        if not exists(ticker_folder): os.makedirs(ticker_folder)
+
+        filename = join(ticker_folder, f"{INTERVAL}.pkl")
+        data.to_pickle(filename)
