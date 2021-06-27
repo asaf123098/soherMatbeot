@@ -1,8 +1,14 @@
+# Pycharm
 .idea/*
-test_results/*
+
+# Python
 __pycache__/*
-coins_data/*
 */__pycache__/*
-*.log
 *.pyc
+
+
+stocks_data/
+test_results/
+coins_data/
+*.log
 
