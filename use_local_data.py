@@ -1,15 +1,16 @@
 import os
+from os.path import join
 
 import pandas as pd
 
 
 def use_local_data(interval, path):
     coins_data = []
-    coin_names = os.listdir(path)
+    symbols = os.listdir(path)
 
-    for coin in coin_names:
-        file_name = path + f"\\{coin}\\{interval}.csv"
-        data = pd.read_csv(file_name)
+    for symbol in symbols:
+        file_name = join(path, symbol, f"{interval}.pkl")
+        data = pd.read_pickle(file_name)
         data["time"] = pd.to_datetime(data.time)
         data.rename(columns={"time": "datetime"}, inplace=True)
         data.set_index("datetime", inplace=True)
@@ -17,6 +18,6 @@ def use_local_data(interval, path):
         if len(data) < 500:
             continue
 
-        coins_data.append((coin, data))
+        coins_data.append((symbol, data))
 
     return coins_data

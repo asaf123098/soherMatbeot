@@ -1,4 +1,5 @@
 import os
+from os.path import join, abspath, dirname, exists
 import re
 from datetime import datetime, timedelta
 
@@ -29,7 +30,10 @@ INTERVAL_OPTS = [
 ]
 N_CANDLES = 1000
 START_DATETIME = datetime(2020, 1, 1)
-COINS_DATA_PATH = "coins_data"
+COINS_DATA_PATH = abspath(join(dirname(__file__), "..","coins_data"))
+STOCKS_DATA_PATH = abspath(join(dirname(__file__), "..","stocks_data"))
+
+
 OHLCV_COLUMN_NAMES = ["open_time", "open", "high", "low", "close", "volume", "close_time", "quote_asset_volume",
                       "n_trades", "base_asset_volume", "quote_asset_volume", "ignore"]
 
@@ -53,27 +57,23 @@ def n_candles_to_start_date(start_date: datetime, interval):
 
     if interval_type == 'm':
         if time_diff_in_seconds / (ONE_MINUTE * n_interval) < N_CANDLES:
-            time_back = (end_date - start_date).total_seconds() / (60 * n_interval)
-        start_date = end_date - timedelta(minutes=time_back)
+            time_back = (end_date - start_date).total_seconds() / (ONE_MINUTE * n_interval)
     elif interval_type == "h":
         if time_diff_in_seconds / (ONE_HOUR * n_interval) < N_CANDLES:
-            time_back = (end_date - start_date).total_seconds() / (60 * 60 * n_interval)
-        start_date = end_date - timedelta(hours=time_back)
+            time_back = (end_date - start_date).total_seconds() / (ONE_HOUR * n_interval)
     elif interval_type == "d":
         if time_diff_in_seconds / (ONE_DAY * n_interval) < N_CANDLES:
-            time_back = (end_date - start_date).total_seconds() / (60 * 60 * 24 * n_interval)
-        start_date = end_date - timedelta(days=time_back)
+            time_back = (end_date - start_date).total_seconds() / (ONE_DAY * n_interval)
     elif interval_type == "w":
         if time_diff_in_seconds / (ONE_DAY * 7 * n_interval) < N_CANDLES:
-            time_back = (end_date - start_date).total_seconds() / (60 * 60 * 24 * 7 * n_interval)
-        start_date = end_date - timedelta(weeks=time_back)
+            time_back = (end_date - start_date).total_seconds() / (ONE_DAY * 7 * n_interval)
     elif interval_type == "M":
         if time_diff_in_seconds / (ONE_DAY * 30 * n_interval) < N_CANDLES:
-            time_back = (end_date - start_date).total_seconds() / (60 * 60 * 24 * 30 * n_interval)
-        start_date = end_date - timedelta(days=time_back)
+            time_back = (end_date - start_date).total_seconds() / (ONE_DAY * 30 * n_interval)
     else:
         ValueError("Wrong Interval")
 
+    start_date = end_date - timedelta(days=time_back)
     start_date_timestamp = int(start_date.timestamp() * 1000)
     return start_date_timestamp
 
@@ -95,8 +95,8 @@ def main():
     coins_usdt_list = [row["symbol"] for row in coins_list if row["symbol"].endswith("USDT")]
 
     for coin in tqdm(coins_usdt_list):
-        folder_coin = os.path.join(COINS_DATA_PATH, coin)
-        if os.path.exists(folder_coin):
+        folder_coin = join(COINS_DATA_PATH, coin)
+        if exists(folder_coin):
             os.remove(folder_coin)
 
         os.mkdir(folder_coin)
