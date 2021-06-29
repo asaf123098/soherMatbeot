@@ -7,6 +7,7 @@ from typing import List, Tuple, Type, Dict
 from constants import COMMISSION, START_AMOUNT
 from strategies.strategy_abs import StrategyAbs
 from feed_creator import PandasFeedCreator
+from use_local_data import Asset
 
 
 class MySizer(bt.Sizer):
@@ -27,7 +28,7 @@ class StrategyTester(object):
     start_amount = START_AMOUNT
     commission = COMMISSION
 
-    def __init__(self, strategy: Type[StrategyAbs], data: List[Tuple[str, pd.DataFrame]], **kwargs):
+    def __init__(self, strategy: Type[StrategyAbs], data: List[Asset], **kwargs):
         self.kwargs = kwargs
         self.strategy = strategy
         self.data = data
@@ -37,7 +38,7 @@ class StrategyTester(object):
         self._run()
 
     def _get_trading_period(self):
-        tmp_data = self.data[0][1]
+        tmp_data = self.data[0].data_frame
         first_day = tmp_data.iloc[0].name
         last_day = tmp_data.iloc[-1].name
         return last_day - first_day
@@ -52,10 +53,10 @@ class StrategyTester(object):
         self.cerebro.addstrategy(self.strategy, **self.kwargs)
 
     def _load_data(self):
-        for coin, data_df in self.data:
-            prepared_data = self.strategy.prepare_data(data_df)
+        for asset in self.data:
+            prepared_data = self.strategy.prepare_data(asset.data_frame)
             data_feed = PandasFeedCreator.to_pandas_feed(prepared_data)
-            self.cerebro.adddata(data_feed, name=coin)
+            self.cerebro.adddata(data_feed, name=asset.symbol)
 
     def _run(self):
         self.runstrategy = self.cerebro.run()[0]
