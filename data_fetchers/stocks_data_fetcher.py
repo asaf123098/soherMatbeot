@@ -67,7 +67,6 @@ if __name__ == "__main__":
 
     for ticker in tqdm(tickers):
         data = yfinance.Ticker(ticker).history(interval=INTERVAL, start=START, end=END)
-        data.rename(columns={"open_time": "time"}, inplace=True)
 
         ticker_folder = abspath(join(STOCKS_DATA_DIR, ticker))
         if not exists(ticker_folder): os.makedirs(ticker_folder)
