@@ -8,7 +8,7 @@ from strategies.strategy_abs import StrategyAbs
 
 RISK = 1.5
 N_CANDLES_BACK = 10
-MODEL_PATH = r"C:\Users\ofeki\Desktop\CryptoAITests\Models\TrendModels\trend_model_{}.pickle"
+MODEL_PATH = r"C:\Users\ofeki\Desktop\CryptoAITests\Models\TrendModels\XGBoost\trend_model_{}.pickle"
 
 
 class DecisionTreeAITrend(StrategyAbs):
