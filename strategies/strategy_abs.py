@@ -11,6 +11,7 @@ class StrategyAbs(Strategy):
     params = (
         ("max_percentage", 0.8),
         ("min_amount", 20),
+        ("interval", 20)
     )
 
     def __init__(self):

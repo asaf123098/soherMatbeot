@@ -4,6 +4,9 @@ import pandas as pd
 import backtrader as bt
 from backtrader import plot
 from typing import List, Tuple, Type, Dict
+
+from tqdm import tqdm
+
 from constants import COMMISSION, START_AMOUNT
 from strategies.strategy_abs import StrategyAbs
 from feed_creator import PandasFeedCreator
@@ -53,7 +56,7 @@ class StrategyTester(object):
         self.cerebro.addstrategy(self.strategy, **self.kwargs)
 
     def _load_data(self):
-        for asset in self.data:
+        for asset in tqdm(self.data):
             prepared_data = self.strategy.prepare_data(asset.data_frame)
             data_feed = PandasFeedCreator.to_pandas_feed(prepared_data)
             self.cerebro.adddata(data_feed, name=asset.symbol)

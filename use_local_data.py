@@ -39,7 +39,7 @@ def use_local_stocks_data(interval, path):
             assets.append(Asset(symbol, asset_data))
 
         # TODO: Remove
-        if len(assets) > 100:
+        if len(assets) > 2:
             break
 
     return assets
